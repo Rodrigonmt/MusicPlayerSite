@@ -102,33 +102,26 @@
             return;
         }
 
-        const formData = new FormData();
+        const map = {
+            vocals: "vocal",
+            drums: "bateria",
+            bass: "baixo",
+            brass: "sopros",
+            other: "outros"
+        };
+
         for (const file of files) {
-            formData.append("folderName", "nome_da_pasta_desejada");
-        }
+            const fileName = file.name.toLowerCase();
+            const nameWithoutExt = fileName.replace(".wav", "");
 
-        fetch('/Music/UploadSeparatedWavs', {
-            method: 'POST',
-            body: formData
-        })
-        .then(() => {
-            // ✅ Força recarregar os players com base na pasta "upload_manual"
-            const folder = "upload_manual";
-            const map = {
-                vocal: "vocals.wav",
-                bateria: "drums.wav",
-                baixo: "bass.wav",
-                sopros: "brass.wav",
-                outros: "other.wav"
-            };
-
-            Object.entries(map).forEach(([id, filename]) => {
-                const audio = document.getElementById(id);
-                if (audio) {
-                    audio.src = `/separados/mdx_extra_q/${folder}/${filename}?t=${new Date().getTime()}`;
+            if (map[nameWithoutExt]) {
+                const audioId = map[nameWithoutExt];
+                const audioElement = document.getElementById(audioId);
+                if (audioElement) {
+                    audioElement.src = URL.createObjectURL(file);
                 }
-            });
-        });
+            }
+        }
     }
 </script>
 

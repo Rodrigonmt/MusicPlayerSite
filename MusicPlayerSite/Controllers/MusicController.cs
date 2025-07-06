@@ -155,7 +155,7 @@ namespace MusicPlayerSite.Controllers
                     await file.CopyToAsync(stream);
 
                     var id = Path.GetFileNameWithoutExtension(filename); // ex: vocals
-                    fileMap[id] = $"/separados/mdx_extra_q/upload_manual/{filename}";
+                    fileMap[id] = $"/separados/mdx_extra_q/{folderName}/{filename}";
                 }
             }
 
