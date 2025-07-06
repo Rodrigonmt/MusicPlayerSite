@@ -1,0 +1,178 @@
+﻿@{
+    ViewData["Title"] = "Player multi-instrumentos";
+    var folder = ViewBag.FolderName ?? "teste";
+}
+
+@if (ViewBag.TempoExecucao != null)
+{
+    <div class="alert alert-info">
+        Tempo de conversão: @ViewBag.TempoExecucao
+    </div>
+}
+
+<h2>Upload de Arquivo MP3</h2>
+<form id="formUpload" enctype="multipart/form-data">
+    <div id="tempoExecucao" style="font-weight: bold; margin-top: 10px;">Tempo: 0s</div>
+    <input type="file" name="file" accept=".mp3" />
+    <button type="submit">Upload</button>
+</form>
+
+<hr />
+
+<h3>Instrumentos separados</h3>
+
+<!-- Botões globais -->
+<div style="margin-bottom: 20px;">
+    <button onclick="playAll()">▶️ Play</button>
+    <button onclick="pauseAll()">⏸️ Pause</button>
+</div>
+
+<!-- Players com controles individuais -->
+<div style="display: flex; flex-direction: column; gap: 20px;">
+
+    <div style="display: flex; flex-direction: column;">
+        <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls></audio>
+        <label>Voz</label>
+        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('vocal', this.value)" />
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+        <audio id="bateria" src="/separados/mdx_extra_q/@folder/drums.wav" controls></audio>
+        <label>Bateria</label>
+        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('bateria', this.value)" />
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+        <audio id="baixo" src="/separados/mdx_extra_q/@folder/bass.wav" controls></audio>
+        <label>Baixo</label>
+        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('baixo', this.value)" />
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+        <audio id="sopros" src="/separados/mdx_extra_q/@folder/brass.wav" controls></audio>
+        <label>Sopros</label>
+        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('sopros', this.value)" />
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+        <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls></audio>
+        <label>Outros</label>
+        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('outros', this.value)" />
+    </div>
+
+    <h2>Carregar pasta com arquivos WAV separados</h2>
+    <form id="wavUploadForm" enctype="multipart/form-data">
+        <input type="file" id="wavFolderInput" name="files" webkitdirectory directory multiple accept=".wav" />
+
+        <button type="button" onclick="uploadWavFolder()">Enviar</button>
+    </form>
+
+
+    <div id="playersContainer"></div>
+
+</div>
+
+<!-- Script -->
+<script>
+    const players = ['vocal', 'bateria', 'baixo', 'sopros', 'outros'].map(id => document.getElementById(id));
+
+    function playAll() {
+        players.forEach(p => {
+            p.currentTime = 0;
+            p.play();
+        });
+    }
+
+    function pauseAll() {
+        players.forEach(p => p.pause());
+    }
+
+    function setVolume(id, val) {
+        document.getElementById(id).volume = parseFloat(val);
+    }
+</script>
+
+<script>
+    function uploadWavFolder() {
+        const input = document.getElementById('wavFolderInput');
+        const files = input.files;
+
+        if (!files || files.length === 0) {
+            alert("Selecione uma pasta com arquivos WAV.");
+            return;
+        }
+
+        const formData = new FormData();
+        for (const file of files) {
+            formData.append("folderName", "nome_da_pasta_desejada");
+        }
+
+        fetch('/Music/UploadSeparatedWavs', {
+            method: 'POST',
+            body: formData
+        })
+        .then(() => {
+            // ✅ Força recarregar os players com base na pasta "upload_manual"
+            const folder = "upload_manual";
+            const map = {
+                vocal: "vocals.wav",
+                bateria: "drums.wav",
+                baixo: "bass.wav",
+                sopros: "brass.wav",
+                outros: "other.wav"
+            };
+
+            Object.entries(map).forEach(([id, filename]) => {
+                const audio = document.getElementById(id);
+                if (audio) {
+                    audio.src = `/separados/mdx_extra_q/${folder}/${filename}?t=${new Date().getTime()}`;
+                }
+            });
+        });
+    }
+</script>
+
+<script>
+    let tempo = 0;
+    let cronometro;
+
+    function iniciarCronometro() {
+        tempo = 0;
+        document.getElementById("tempoExecucao").textContent = "Tempo: 0s";
+        cronometro = setInterval(() => {
+            tempo++;
+            document.getElementById("tempoExecucao").textContent = `Tempo: ${tempo}s`;
+        }, 1000);
+    }
+
+    function pararCronometro() {
+        clearInterval(cronometro);
+        document.getElementById("tempoExecucao").textContent += " (finalizado)";
+    }
+
+    document.getElementById("formUpload").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        iniciarCronometro();
+
+        fetch('/Music/Upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            pararCronometro();
+
+            // Opcional: mostrar mensagem de retorno
+            alert(data);
+
+            // Opcional: atualizar a página para carregar os novos arquivos
+            location.reload();
+        })
+        .catch(error => {
+            pararCronometro();
+            alert("Erro: " + error);
+        });
+    });
+</script>
