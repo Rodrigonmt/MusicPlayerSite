@@ -30,6 +30,25 @@
 <!-- Players com controles individuais -->
 <div style="display: flex; flex-direction: column; gap: 20px;">
 
+    <div style="margin: 20px 0;">
+        <label for="speedControl"><strong>Velocidade de reprodução: <span id="speedLabel">100%</span></strong></label>
+        <input id="speedControl" type="range" min="10" max="200" value="100" step="1" onchange="updatePlaybackSpeed(this.value)" />
+    </div>
+
+    <button onclick="document.getElementById('speedControl').value = 100; updatePlaybackSpeed(100)">Resetar Velocidade</button>
+
+    <div style="margin: 20px 0;">
+        <h3>Loop Personalizado</h3>
+        <label for="loopStart">Início (s):</label>
+        <input id="loopStart" type="number" min="0" value="0" style="width: 60px;" />
+
+        <label for="loopEnd">Fim (s):</label>
+        <input id="loopEnd" type="number" min="1" value="10" style="width: 60px;" />
+
+        <button onclick="ativarLoop()">Ativar Loop</button>
+        <button onclick="desativarLoop()">Desativar Loop</button>
+    </div>
+
     <div style="display: flex; flex-direction: column;">
         <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls></audio>
         <label>Voz</label>
@@ -168,4 +187,47 @@
             alert("Erro: " + error);
         });
     });
+</script>
+
+<script>
+    function updatePlaybackSpeed(percent) {
+        const rate = percent / 100;
+        players.forEach(p => {
+            p.playbackRate = rate;
+        });
+        document.getElementById("speedLabel").textContent = `${percent}%`;
+    }
+
+    // Inicializa players com velocidade normal ao carregar
+    document.addEventListener("DOMContentLoaded", () => {
+        updatePlaybackSpeed(document.getElementById("speedControl").value);
+    });
+</script>
+
+<script>
+    let loopAtivo = false;
+    let intervaloLoop = null;
+    let inicioLoop = 0;
+    let fimLoop = 10;
+
+    function ativarLoop() {
+        inicioLoop = parseFloat(document.getElementById("loopStart").value);
+        fimLoop = parseFloat(document.getElementById("loopEnd").value);
+        loopAtivo = true;
+
+        clearInterval(intervaloLoop);
+
+        intervaloLoop = setInterval(() => {
+            players.forEach(player => {
+                if (loopAtivo && player.currentTime >= fimLoop) {
+                    player.currentTime = inicioLoop;
+                }
+            });
+        }, 200); // Verifica a cada 200ms
+    }
+
+    function desativarLoop() {
+        loopAtivo = false;
+        clearInterval(intervaloLoop);
+    }
 </script>
