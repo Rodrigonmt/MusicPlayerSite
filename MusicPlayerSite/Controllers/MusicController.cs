@@ -59,8 +59,8 @@ namespace MusicPlayerSite.Controllers
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = @"C:\Users\Rodrigo\AppData\Local\Programs\Python\Python39\Scripts\demucs.exe",
-                    Arguments = $"-n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
+                    FileName = "python3",
+                    Arguments = "-m demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
