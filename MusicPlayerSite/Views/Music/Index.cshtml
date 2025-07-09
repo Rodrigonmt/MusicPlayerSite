@@ -3,287 +3,755 @@
     var folder = ViewBag.FolderName ?? "teste";
 }
 
-@if (ViewBag.TempoExecucao != null)
-{
-    <div class="alert alert-info">
-        Tempo de conversão: @ViewBag.TempoExecucao
-    </div>
-}
-
-<h2>Separação de Componentes de Áudio</h2>
-<form id="formUpload" enctype="multipart/form-data">
-    <div id="tempoExecucao" style="font-weight: bold; margin-top: 10px;">Tempo: 0s</div>
-    <input type="file" name="file" accept=".mp3" />
-    <button type="submit">Iniciar</button>
-</form>
-
-<!-- Overlay de carregamento com animação CSS pura -->
-<div id="loadingOverlay" style="
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    flex-direction: column;
-">
-    <div class="spinner"></div>
-    <div style="color: white; margin-top: 15px; font-size: 18px;">Separando instrumentos...</div>
-</div>
-
-
-<hr />
-
-<h3>Instrumentos separados</h3>
-
-<!-- Botões globais -->
-<div style="margin-bottom: 20px;">
-    <button onclick="playAll()">▶️ Play</button>
-    <button onclick="pauseAll()">⏸️ Pause</button>
-    <button onclick="stopAll()">⏹️ Parar</button>
-</div>
-
-<!-- Players com controles individuais -->
-<div style="display: flex; flex-direction: column; gap: 20px;">
-
-    <div style="margin: 20px 0;">
-        <label for="speedControl"><strong>Velocidade de reprodução: <span id="speedLabel">100%</span></strong></label>
-        <input id="speedControl" type="range" min="10" max="200" value="100" step="1" onchange="updatePlaybackSpeed(this.value)" />
-    </div>
-
-    <button onclick="document.getElementById('speedControl').value = 100; updatePlaybackSpeed(100)">Resetar Velocidade</button>
-
-    <div style="margin: 20px 0;">
-        <h3>Loop Personalizado</h3>
-        <label for="loopStart">Início (s):</label>
-        <input id="loopStart" type="number" min="0" value="0" style="width: 60px;" />
-
-        <label for="loopEnd">Fim (s):</label>
-        <input id="loopEnd" type="number" min="1" value="10" style="width: 60px;" />
-
-        <button onclick="ativarLoop()">Ativar Loop</button>
-        <button onclick="desativarLoop()">Desativar Loop</button>
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
-        <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls></audio>
-        <label>Voz</label>
-        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('vocal', this.value)" />
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
-        <audio id="bateria" src="/separados/mdx_extra_q/@folder/drums.wav" controls></audio>
-        <label>Bateria</label>
-        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('bateria', this.value)" />
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
-        <audio id="baixo" src="/separados/mdx_extra_q/@folder/bass.wav" controls></audio>
-        <label>Baixo</label>
-        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('baixo', this.value)" />
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
-        <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls></audio>
-        <label>Outros</label>
-        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('outros', this.value)" />
-    </div>
-
-    <h2>Carregar pasta com arquivos WAV separados</h2>
-    <form id="wavUploadForm" enctype="multipart/form-data">
-        <input type="file" id="wavFolderInput" name="files" webkitdirectory directory multiple accept=".wav" />
-
-        <button type="button" onclick="uploadWavFolder()">Enviar</button>
-    </form>
-
-
-    <div id="playersContainer"></div>
-
-</div>
-
-<!-- Script -->
-<script>
-    const players = ['vocal', 'bateria', 'baixo', 'outros'].map(id => document.getElementById(id));
-
-
-    function playAll() {
-        players.forEach(p => {
-            p.currentTime = 0;
-            p.play();
-        });
-    }
-
-    function pauseAll() {
-        players.forEach(p => p.pause());
-    }
-
-    function stopAll() {
-        players.forEach(p => {
-            p.pause();
-            p.currentTime = 0;
-        });
-    }
-
-
-    function setVolume(id, val) {
-        document.getElementById(id).volume = parseFloat(val);
-    }
-</script>
-
-<script>
-    function uploadWavFolder() {
-        const input = document.getElementById('wavFolderInput');
-        const files = input.files;
-
-        if (!files || files.length === 0) {
-            alert("Selecione uma pasta com arquivos WAV.");
-            return;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        const map = {
-            vocals: "vocal",
-            drums: "bateria",
-            bass: "baixo",
-            other: "outros"
-            // Removido: brass: "sopros"
-        };
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 1rem;
+            color: #334155;
+        }
 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
 
-        for (const file of files) {
-            const fileName = file.name.toLowerCase();
-            const nameWithoutExt = fileName.replace(".wav", "");
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-            if (map[nameWithoutExt]) {
-                const audioId = map[nameWithoutExt];
-                const audioElement = document.getElementById(audioId);
-                if (audioElement) {
-                    audioElement.src = URL.createObjectURL(file);
-                }
+            .header h1 {
+                font-size: 2.5rem;
+                font-weight: 700;
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin-bottom: 0.5rem;
             }
+
+            .header p {
+                color: #64748b;
+                font-size: 1.1rem;
+            }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-    }
-</script>
 
-<script>
-    function mostrarOverlay() {
-        document.getElementById("loadingOverlay").style.display = "flex";
-    }
+        .card-header {
+            margin-bottom: 1.5rem;
+        }
 
-    function ocultarOverlay() {
-        document.getElementById("loadingOverlay").style.display = "none";
-    }
-</script>
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-<script>
-    let tempo = 0;
-    let cronometro;
+        .alert {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1e40af;
+        }
 
-    function iniciarCronometro() {
-        tempo = 0;
-        document.getElementById("tempoExecucao").textContent = "Tempo: 0s";
-        cronometro = setInterval(() => {
-            tempo++;
-            document.getElementById("tempoExecucao").textContent = `Tempo: ${tempo}s`;
-        }, 1000);
-    }
+        .form-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
 
-    function pararCronometro() {
-        clearInterval(cronometro);
-        document.getElementById("tempoExecucao").textContent += " (finalizado)";
-    }
+            .form-group input[type="file"] {
+                flex: 1;
+                padding: 0.75rem;
+                border: 2px solid #e2e8f0;
+                border-radius: 0.5rem;
+                background: white;
+                transition: border-color 0.2s;
+            }
 
-    document.getElementById("formUpload").addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        iniciarCronometro();
-        mostrarOverlay(); // novo
-
-        fetch('/Music/Upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(data => {
-            pararCronometro();
-
-            ocultarOverlay(); // novo
-
-            // Opcional: mostrar mensagem de retorno
-            alert(data);
-
-            // Opcional: atualizar a página para carregar os novos arquivos
-            location.reload();
-        })
-        .catch(error => {
-            pararCronometro();
-            ocultarOverlay(); // novo
-            alert("Erro: " + error);
-        });
-    });
-</script>
-
-<script>
-    function updatePlaybackSpeed(percent) {
-        const rate = percent / 100;
-        players.forEach(p => {
-            p.playbackRate = rate;
-        });
-        document.getElementById("speedLabel").textContent = `${percent}%`;
-    }
-
-    // Inicializa players com velocidade normal ao carregar
-    document.addEventListener("DOMContentLoaded", () => {
-        updatePlaybackSpeed(document.getElementById("speedControl").value);
-    });
-</script>
-
-<script>
-    let loopAtivo = false;
-    let intervaloLoop = null;
-    let inicioLoop = 0;
-    let fimLoop = 10;
-
-    function ativarLoop() {
-        inicioLoop = parseFloat(document.getElementById("loopStart").value);
-        fimLoop = parseFloat(document.getElementById("loopEnd").value);
-        loopAtivo = true;
-
-        clearInterval(intervaloLoop);
-
-        intervaloLoop = setInterval(() => {
-            players.forEach(player => {
-                if (loopAtivo && player.currentTime >= fimLoop) {
-                    player.currentTime = inicioLoop;
+                .form-group input[type="file"]:focus {
+                    outline: none;
+                    border-color: #3b82f6;
                 }
-            });
-        }, 200); // Verifica a cada 200ms
-    }
 
-    function desativarLoop() {
-        loopAtivo = false;
-        clearInterval(intervaloLoop);
-    }
-</script>
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
 
-<style>
-    .spinner {
-        width: 64px;
-        height: 64px;
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid #4caf50;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
 
-    @@keyframes spin {
-        0% {
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #2563eb, #1d4ed8);
+                transform: translateY(-1px);
+            }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+        }
+
+            .btn-outline:hover {
+                background: #f8fafc;
+                border-color: #cbd5e1;
+            }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .global-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .slider-container {
+            margin: 1rem 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+            .slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #3b82f6;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #3b82f6;
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+        .instruments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .instrument-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .instrument-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .instrument-icon {
+            font-size: 1.5rem;
+        }
+
+        .instrument-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .instrument-content {
+            padding: 1.5rem;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .volume-icon {
+            width: 1rem;
+            height: 1rem;
+            fill: currentColor;
+        }
+
+        .loop-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+            .input-group label {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #374151;
+            }
+
+            .input-group input {
+                padding: 0.5rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.375rem;
+                font-size: 0.875rem;
+            }
+
+                .input-group input:focus {
+                    outline: none;
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .spinner {
+            width: 64px;
+            height: 64px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @@keyframes spin {
+            0%
+
+        {
             transform: rotate(0deg);
         }
 
         100% {
             transform: rotate(360deg);
         }
-    }
-</style>
+
+        }
+
+        .time-display {
+            font-weight: 600;
+            color: #3b82f6;
+            margin-top: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 2rem 0 1rem;
+            color: #1e293b;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .header h1
+
+        {
+            font-size: 2rem;
+        }
+
+        .form-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .global-controls {
+            justify-content: center;
+        }
+
+        .instruments-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .controls-grid {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        /* Color variations for instruments */
+        .vocal-accent {
+            border-top: 4px solid #3b82f6;
+        }
+
+        .bateria-accent {
+            border-top: 4px solid #ef4444;
+        }
+
+        .baixo-accent {
+            border-top: 4px solid #10b981;
+        }
+
+        .outros-accent {
+            border-top: 4px solid #8b5cf6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Player Multi-Instrumentos</h1>
+            <p>Separação e reprodução de componentes de áudio</p>
+        </div>
+
+        <!-- Execution Time Alert -->
+        @if (ViewBag.TempoExecucao != null)
+        {
+            <div class="alert">
+                <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12,6 12,12 16,14" />
+                </svg>
+                Tempo de conversão: @ViewBag.TempoExecucao
+            </div>
+        }
+
+        <!-- Upload Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Separação de Componentes de Áudio
+                </h2>
+            </div>
+            <form id="formUpload" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" name="file" accept=".mp3" />
+                    <button type="submit" class="btn btn-primary">Iniciar</button>
+                </div>
+                <div id="tempoExecucao" class="time-display">Tempo: 0s</div>
+            </form>
+        </div>
+
+        <!-- Global Controls -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Controles Globais</h2>
+            </div>
+            <div class="global-controls">
+                <button onclick="playAll()" class="btn btn-outline">
+                    ▶️ Play
+                </button>
+                <button onclick="pauseAll()" class="btn btn-outline">
+                    ⏸️ Pause
+                </button>
+                <button onclick="stopAll()" class="btn btn-outline">
+                    ⏹️ Parar
+                </button>
+            </div>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="controls-grid">
+            <!-- Speed Control -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Velocidade de Reprodução
+                        <span id="speedLabel" style="font-family: monospace;">100%</span>
+                    </h3>
+                </div>
+                <div class="slider-container">
+                    <input id="speedControl" type="range" min="10" max="200" value="100" step="1"
+                           class="slider" onchange="updatePlaybackSpeed(this.value)" />
+                </div>
+                <button onclick="document.getElementById('speedControl').value = 100; updatePlaybackSpeed(100)"
+                        class="btn btn-outline">
+                    🔄 Resetar Velocidade
+                </button>
+            </div>
+
+            <!-- Loop Control -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        🔁 Loop Personalizado
+                    </h3>
+                </div>
+                <div class="loop-controls">
+                    <div class="input-group">
+                        <label for="loopStart">Início (s)</label>
+                        <input id="loopStart" type="number" min="0" value="0" />
+                    </div>
+                    <div class="input-group">
+                        <label for="loopEnd">Fim (s)</label>
+                        <input id="loopEnd" type="number" min="1" value="10" />
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="ativarLoop()" class="btn btn-primary" style="flex: 1;">
+                        Ativar Loop
+                    </button>
+                    <button onclick="desativarLoop()" class="btn btn-outline" style="flex: 1;">
+                        Desativar Loop
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instruments Section -->
+        <h2 class="section-title">Instrumentos Separados</h2>
+        <div class="instruments-grid">
+            <!-- Vocal -->
+            <div class="instrument-card vocal-accent">
+                <div class="instrument-header">
+                    <span class="instrument-icon">🎤</span>
+                    <span class="instrument-name">Voz</span>
+                </div>
+                <div class="instrument-content">
+                    <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls class="audio-player"></audio>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Volume</span>
+                            <span id="vocal-volume">100%</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.01" value="1"
+                               class="slider" onchange="setVolume('vocal', this.value)" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bateria -->
+            <div class="instrument-card bateria-accent">
+                <div class="instrument-header">
+                    <span class="instrument-icon">🥁</span>
+                    <span class="instrument-name">Bateria</span>
+                </div>
+                <div class="instrument-content">
+                    <audio id="bateria" src="/separados/mdx_extra_q/@folder/drums.wav" controls class="audio-player"></audio>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Volume</span>
+                            <span id="bateria-volume">100%</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.01" value="1"
+                               class="slider" onchange="setVolume('bateria', this.value)" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baixo -->
+            <div class="instrument-card baixo-accent">
+                <div class="instrument-header">
+                    <span class="instrument-icon">🎸</span>
+                    <span class="instrument-name">Baixo</span>
+                </div>
+                <div class="instrument-content">
+                    <audio id="baixo" src="/separados/mdx_extra_q/@folder/bass.wav" controls class="audio-player"></audio>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Volume</span>
+                            <span id="baixo-volume">100%</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.01" value="1"
+                               class="slider" onchange="setVolume('baixo', this.value)" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outros -->
+            <div class="instrument-card outros-accent">
+                <div class="instrument-header">
+                    <span class="instrument-icon">🎵</span>
+                    <span class="instrument-name">Outros</span>
+                </div>
+                <div class="instrument-content">
+                    <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls class="audio-player"></audio>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Volume</span>
+                            <span id="outros-volume">100%</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.01" value="1"
+                               class="slider" onchange="setVolume('outros', this.value)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WAV Upload Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Carregar Pasta com Arquivos WAV
+                </h2>
+            </div>
+            <form id="wavUploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" id="wavFolderInput" name="files" webkitdirectory directory multiple accept=".wav" />
+                    <button type="button" onclick="uploadWavFolder()" class="btn btn-outline">
+                        📁 Enviar
+                    </button>
+                </div>
+            </form>
+            <div id="playersContainer"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div>
+                <p style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Separando instrumentos...</p>
+                <p style="color: #64748b;">Aguarde enquanto processamos seu arquivo</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts (mantendo todas as funcionalidades originais) -->
+    <script>
+        const players = ['vocal', 'bateria', 'baixo', 'outros'].map(id => document.getElementById(id));
+
+        function playAll() {
+            players.forEach(p => {
+                p.currentTime = 0;
+                p.play();
+            });
+        }
+
+        function pauseAll() {
+            players.forEach(p => p.pause());
+        }
+
+        function stopAll() {
+            players.forEach(p => {
+                p.pause();
+                p.currentTime = 0;
+            });
+        }
+
+        function setVolume(id, val) {
+            const player = document.getElementById(id);
+            player.volume = parseFloat(val);
+            document.getElementById(id + '-volume').textContent = Math.round(val * 100) + '%';
+        }
+
+        function uploadWavFolder() {
+            const input = document.getElementById('wavFolderInput');
+            const files = input.files;
+            if (!files || files.length === 0) {
+                alert("Selecione uma pasta com arquivos WAV.");
+                return;
+            }
+
+            const map = {
+                vocals: "vocal",
+                drums: "bateria",
+                bass: "baixo",
+                other: "outros"
+            };
+
+            for (const file of files) {
+                const fileName = file.name.toLowerCase();
+                const nameWithoutExt = fileName.replace(".wav", "");
+                if (map[nameWithoutExt]) {
+                    const audioId = map[nameWithoutExt];
+                    const audioElement = document.getElementById(audioId);
+                    if (audioElement) {
+                        audioElement.src = URL.createObjectURL(file);
+                    }
+                }
+            }
+        }
+
+        function mostrarOverlay() {
+            document.getElementById("loadingOverlay").style.display = "flex";
+        }
+
+        function ocultarOverlay() {
+            document.getElementById("loadingOverlay").style.display = "none";
+        }
+
+        let tempo = 0;
+        let cronometro;
+
+        function iniciarCronometro() {
+            tempo = 0;
+            document.getElementById("tempoExecucao").textContent = "Tempo: 0s";
+            cronometro = setInterval(() => {
+                tempo++;
+                document.getElementById("tempoExecucao").textContent = `Tempo: ${tempo}s`;
+            }, 1000);
+        }
+
+        function pararCronometro() {
+            clearInterval(cronometro);
+            document.getElementById("tempoExecucao").textContent += " (finalizado)";
+        }
+
+        document.getElementById("formUpload").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            iniciarCronometro();
+            mostrarOverlay();
+
+            fetch('/Music/Upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                pararCronometro();
+                ocultarOverlay();
+                alert(data);
+                location.reload();
+            })
+            .catch(error => {
+                pararCronometro();
+                ocultarOverlay();
+                alert("Erro: " + error);
+            });
+        });
+
+        function updatePlaybackSpeed(percent) {
+            const rate = percent / 100;
+            players.forEach(p => {
+                p.playbackRate = rate;
+            });
+            document.getElementById("speedLabel").textContent = `${percent}%`;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updatePlaybackSpeed(document.getElementById("speedControl").value);
+        });
+
+        let loopAtivo = false;
+        let intervaloLoop = null;
+        let inicioLoop = 0;
+        let fimLoop = 10;
+
+        function ativarLoop() {
+            inicioLoop = parseFloat(document.getElementById("loopStart").value);
+            fimLoop = parseFloat(document.getElementById("loopEnd").value);
+            loopAtivo = true;
+            clearInterval(intervaloLoop);
+            intervaloLoop = setInterval(() => {
+                players.forEach(player => {
+                    if (loopAtivo && player.currentTime >= fimLoop) {
+                        player.currentTime = inicioLoop;
+                    }
+                });
+            }, 200);
+        }
+
+        function desativarLoop() {
+            loopAtivo = false;
+            clearInterval(intervaloLoop);
+        }
+    </script>
+</body>
+</html>
