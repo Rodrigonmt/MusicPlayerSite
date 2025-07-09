@@ -17,6 +17,22 @@
     <button type="submit">Iniciar</button>
 </form>
 
+<!-- Overlay de carregamento com animação CSS pura -->
+<div id="loadingOverlay" style="
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+">
+    <div class="spinner"></div>
+    <div style="color: white; margin-top: 15px; font-size: 18px;">Separando instrumentos...</div>
+</div>
+
+
 <hr />
 
 <h3>Instrumentos separados</h3>
@@ -150,6 +166,16 @@
 </script>
 
 <script>
+    function mostrarOverlay() {
+        document.getElementById("loadingOverlay").style.display = "flex";
+    }
+
+    function ocultarOverlay() {
+        document.getElementById("loadingOverlay").style.display = "none";
+    }
+</script>
+
+<script>
     let tempo = 0;
     let cronometro;
 
@@ -172,6 +198,7 @@
 
         const formData = new FormData(this);
         iniciarCronometro();
+        mostrarOverlay(); // novo
 
         fetch('/Music/Upload', {
             method: 'POST',
@@ -181,6 +208,8 @@
         .then(data => {
             pararCronometro();
 
+            ocultarOverlay(); // novo
+
             // Opcional: mostrar mensagem de retorno
             alert(data);
 
@@ -189,6 +218,7 @@
         })
         .catch(error => {
             pararCronometro();
+            ocultarOverlay(); // novo
             alert("Erro: " + error);
         });
     });
@@ -236,3 +266,24 @@
         clearInterval(intervaloLoop);
     }
 </script>
+
+<style>
+    .spinner {
+        width: 64px;
+        height: 64px;
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #4caf50;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
