@@ -59,17 +59,18 @@ namespace MusicPlayerSite.Controllers
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = @"C:\Users\Rodrigo\AppData\Local\Programs\Python\Python39\Scripts\demucs.exe",
+                    FileName = "demucs",
                     Arguments = $"-n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    CreateNoWindow = true
-
+                    CreateNoWindow = true,
+                    WorkingDirectory = "/app" // importante para ambiente Docker/Render
                 };
 
+                // Remova a linha psi.Environment["PATH"] += ... (só vale em Windows)
 
-                psi.Environment["PATH"] += @";C:\ffmpeg\bin";
+
 
                 psi.RedirectStandardOutput = true;
                 psi.RedirectStandardError = true;
