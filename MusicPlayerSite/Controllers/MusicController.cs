@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Text;
 
 namespace MusicPlayerSite.Controllers
 {
@@ -38,6 +39,8 @@ namespace MusicPlayerSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file)
         {
+            var outputBuilder = new StringBuilder();
+            var errorBuilder = new StringBuilder();
             if (file != null && Path.GetExtension(file.FileName).ToLower() == ".mp3")
             {
                 var uploadsPath = Path.Combine(_env.WebRootPath, "uploads");
@@ -97,7 +100,35 @@ namespace MusicPlayerSite.Controllers
                 }
 
                 TempData["FolderName"] = fileNameWithoutExt;
+                process.OutputDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        outputBuilder.AppendLine(e.Data);
+                };
+
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        errorBuilder.AppendLine(e.Data);
+                };
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    var errorMsg = errorBuilder.ToString();
+                    Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
+                    Console.WriteLine(errorMsg);
+                    return Content($"Erro ao executar demucs. Código de saída: {process.ExitCode}\n{errorMsg}");
+                }
+
+                return Content("Demucs executado com sucesso!\n" + outputBuilder.ToString());
             }
+
 
             return Content("Conversão concluída com sucesso!");
         }
