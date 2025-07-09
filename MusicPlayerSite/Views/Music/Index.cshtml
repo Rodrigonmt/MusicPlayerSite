@@ -10,11 +10,11 @@
     </div>
 }
 
-<h2>Upload de Arquivo MP3</h2>
+<h2>Separação de Componentes de Áudio</h2>
 <form id="formUpload" enctype="multipart/form-data">
     <div id="tempoExecucao" style="font-weight: bold; margin-top: 10px;">Tempo: 0s</div>
     <input type="file" name="file" accept=".mp3" />
-    <button type="submit">Upload</button>
+    <button type="submit">Iniciar</button>
 </form>
 
 <hr />
@@ -25,6 +25,7 @@
 <div style="margin-bottom: 20px;">
     <button onclick="playAll()">▶️ Play</button>
     <button onclick="pauseAll()">⏸️ Pause</button>
+    <button onclick="stopAll()">⏹️ Parar</button>
 </div>
 
 <!-- Players com controles individuais -->
@@ -68,12 +69,6 @@
     </div>
 
     <div style="display: flex; flex-direction: column;">
-        <audio id="sopros" src="/separados/mdx_extra_q/@folder/brass.wav" controls></audio>
-        <label>Sopros</label>
-        <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('sopros', this.value)" />
-    </div>
-
-    <div style="display: flex; flex-direction: column;">
         <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls></audio>
         <label>Outros</label>
         <input type="range" min="0" max="1" step="0.01" value="1" onchange="setVolume('outros', this.value)" />
@@ -93,7 +88,8 @@
 
 <!-- Script -->
 <script>
-    const players = ['vocal', 'bateria', 'baixo', 'sopros', 'outros'].map(id => document.getElementById(id));
+    const players = ['vocal', 'bateria', 'baixo', 'outros'].map(id => document.getElementById(id));
+
 
     function playAll() {
         players.forEach(p => {
@@ -105,6 +101,14 @@
     function pauseAll() {
         players.forEach(p => p.pause());
     }
+
+    function stopAll() {
+        players.forEach(p => {
+            p.pause();
+            p.currentTime = 0;
+        });
+    }
+
 
     function setVolume(id, val) {
         document.getElementById(id).volume = parseFloat(val);
@@ -125,9 +129,10 @@
             vocals: "vocal",
             drums: "bateria",
             bass: "baixo",
-            brass: "sopros",
             other: "outros"
+            // Removido: brass: "sopros"
         };
+
 
         for (const file of files) {
             const fileName = file.name.toLowerCase();

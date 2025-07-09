@@ -71,60 +71,43 @@ namespace MusicPlayerSite.Controllers
 
                 psi.Environment["PATH"] += @";C:\ffmpeg\bin";
 
-                using var process = Process.Start(psi);
-                string output = await process.StandardOutput.ReadToEndAsync();
-                string errors = await process.StandardError.ReadToEndAsync();
+                psi.RedirectStandardOutput = true;
+                psi.RedirectStandardError = true;
+
+                using var process = new Process();
+                process.StartInfo = psi;
+
+                process.OutputDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        System.Console.WriteLine("OUT: " + e.Data);
+                };
+
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                        System.Console.WriteLine("ERR: " + e.Data);
+                };
+
+                process.Start();
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
                 await process.WaitForExitAsync();
 
                 if (process.ExitCode != 0)
                 {
-                    System.Console.WriteLine("Erro ao executar demucs:");
-                    System.Console.WriteLine("STDOUT:");
-                    System.Console.WriteLine(output);
-                    System.Console.WriteLine("STDERR:");
-                    System.Console.WriteLine(errors);
+                    System.Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
                 }
                 else
                 {
-                    System.Console.WriteLine("Demucs executado com sucesso:");
-                    System.Console.WriteLine(output);
+                    System.Console.WriteLine("Demucs executado com sucesso!");
                 }
+
 
                 // 👇 Salva nome da pasta gerada para a View usar
                 TempData["FolderName"] = fileNameWithoutExt;
-
-                // === EXTRAÇÃO DE SOPROS A PARTIR DO other.wav ===
-                var pathOther = Path.Combine(outputPath, "mdx_extra_q", fileNameWithoutExt, "other.wav");
-                var pathBrass = Path.Combine(outputPath, "mdx_extra_q", fileNameWithoutExt, "brass.wav");
-
-                var scriptPath = Path.Combine(_env.ContentRootPath, "Scripts", "extrair_sopros.py");
-
-                var soprosProcess = new ProcessStartInfo
-                {
-                    FileName = "python",
-                    Arguments = $"\"{scriptPath}\" \"{pathOther}\" \"{pathBrass}\"",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using var processSopros = Process.Start(soprosProcess);
-                string soprosOut = await processSopros.StandardOutput.ReadToEndAsync();
-                string soprosErr = await processSopros.StandardError.ReadToEndAsync();
-                await processSopros.WaitForExitAsync();
-
-                if (processSopros.ExitCode != 0)
-                {
-                    System.Console.WriteLine("Erro ao extrair sopros:");
-                    System.Console.WriteLine(soprosErr);
-                }
-                else
-                {
-                    System.Console.WriteLine("Extração de sopros realizada com sucesso:");
-                    System.Console.WriteLine(soprosOut);
-                }
-
 
 
             }
@@ -141,7 +124,7 @@ namespace MusicPlayerSite.Controllers
             var outputPath = Path.Combine(_env.WebRootPath, "separados", "mdx_extra_q", folderName);
             Directory.CreateDirectory(outputPath);
 
-            var knownNames = new[] { "vocals.wav", "drums.wav", "bass.wav", "other.wav", "brass.wav" };
+            var knownNames = new[] { "vocals.wav", "drums.wav", "bass.wav", "other.wav" }; // removido brass.wav
             var fileMap = new Dictionary<string, string>(); // para JS: id do player => caminho do arquivo
 
             foreach (var file in files)

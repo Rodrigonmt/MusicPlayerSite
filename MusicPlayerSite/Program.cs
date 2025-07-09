@@ -10,3 +10,9 @@ app.MapControllerRoute(
     pattern: "{controller=Music}/{action=Index}/{id?}");
 
 app.Run();
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30); // ou o necessário
+    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
+});
