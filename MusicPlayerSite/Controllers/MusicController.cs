@@ -18,102 +18,84 @@ namespace MusicPlayerSite.Controllers
             _env = env;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string folder)
         {
-            var separadosPath = Path.Combine(_env.WebRootPath, "separados");
+            if (!string.IsNullOrWhiteSpace(folder))
+                TempData["FolderName"] = folder;
 
-            var files = Directory.Exists(separadosPath)
-                ? Directory.GetFiles(separadosPath, "*.mp3").Select(f => Path.GetFileName(f)).ToList()
-                : new System.Collections.Generic.List<string>();
-
-            ViewBag.Files = files;
-
-            // 👇 Aqui você pega o nome da pasta gerada (sem extensão)
             ViewBag.FolderName = TempData["FolderName"]?.ToString();
-
+            ViewBag.Files = new List<string>();
             return View();
         }
 
 
+
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file, [FromForm] string destino)
         {
-            if (file != null && Path.GetExtension(file.FileName).ToLower() == ".mp3")
+            if (file == null || Path.GetExtension(file.FileName).ToLower() != ".mp3")
+                return Json(new { sucesso = false, mensagem = "Arquivo inválido ou não informado." });
+
+            try
             {
+                // Salvar o .mp3 no servidor
                 var uploadsPath = Path.Combine(_env.WebRootPath, "uploads");
                 Directory.CreateDirectory(uploadsPath);
 
                 var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file.FileName);
                 var filePath = Path.Combine(uploadsPath, file.FileName);
 
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await file.CopyToAsync(stream);
+                await using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
 
-                var outputPath = Path.Combine(_env.WebRootPath, "separados");
-                Directory.CreateDirectory(outputPath);
+                // Criar pasta final escolhida pelo usuário
+                var destinoFinal = Path.Combine(_env.WebRootPath, "separados", "mdx_extra_q", destino, fileNameWithoutExt);
+                Directory.CreateDirectory(destinoFinal);
 
-                System.Console.WriteLine($"Comando: demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"");
-                System.Console.WriteLine($"Arquivo existe? {System.IO.File.Exists(filePath)}");
-
-
-
+                // Iniciar processo de separação com demucs
                 var psi = new ProcessStartInfo
                 {
                     FileName = @"C:\Users\Rodrigo\AppData\Local\Programs\Python\Python39\Scripts\demucs.exe",
-                    Arguments = $"-n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
+                    Arguments = $"-n mdx_extra_q -o \"{Path.Combine(_env.WebRootPath, "separados", "mdx_extra_q")}\" \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
-
                 };
 
-
+                // Adiciona ffmpeg ao PATH
                 psi.Environment["PATH"] += @";C:\ffmpeg\bin";
-
-                psi.RedirectStandardOutput = true;
-                psi.RedirectStandardError = true;
 
                 using var process = new Process();
                 process.StartInfo = psi;
 
-                process.OutputDataReceived += (s, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        System.Console.WriteLine("OUT: " + e.Data);
-                };
-
-                process.ErrorDataReceived += (s, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        System.Console.WriteLine("ERR: " + e.Data);
-                };
+                string stdOut = "", stdErr = "";
+                process.OutputDataReceived += (s, e) => { if (!string.IsNullOrEmpty(e.Data)) stdOut += e.Data + "\n"; };
+                process.ErrorDataReceived += (s, e) => { if (!string.IsNullOrEmpty(e.Data)) stdErr += e.Data + "\n"; };
 
                 process.Start();
-
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-
                 await process.WaitForExitAsync();
 
                 if (process.ExitCode != 0)
                 {
-                    System.Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
-                }
-                else
-                {
-                    System.Console.WriteLine("Demucs executado com sucesso!");
+                    return Json(new { sucesso = false, mensagem = "Erro na conversão", erro = stdErr });
                 }
 
+                TempData["FolderName"] = Path.Combine(destino, fileNameWithoutExt); // Para uso na view
 
-                // 👇 Salva nome da pasta gerada para a View usar
-                TempData["FolderName"] = fileNameWithoutExt;
-
-
+                return Json(new { sucesso = true, pasta = TempData["FolderName"], log = stdOut });
             }
-
-            return Content("Conversão concluída com sucesso!");
+            catch (Exception ex)
+            {
+                return Json(new { sucesso = false, mensagem = "Erro ao converter o arquivo", erro = ex.Message });
+            }
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> UploadSeparatedWavs([FromForm] List<IFormFile> files, [FromForm] string folderName)
@@ -151,6 +133,8 @@ namespace MusicPlayerSite.Controllers
             if (arquivo == null || arquivo.Length == 0)
                 return Content("Arquivo inválido");
 
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(arquivo.FileName);
+
             var caminhoArquivo = Path.Combine("wwwroot", "uploads", arquivo.FileName);
             using (var stream = new FileStream(caminhoArquivo, FileMode.Create))
             {
@@ -174,8 +158,10 @@ namespace MusicPlayerSite.Controllers
             if (!string.IsNullOrEmpty(erro))
                 return Content("Erro na conversão: " + erro);
 
-            return Content("Conversão concluída com sucesso!");
+            return Json(new { success = true, nomeArquivo = fileNameWithoutExt });
         }
+
+
 
 
     }

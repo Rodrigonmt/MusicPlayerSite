@@ -904,7 +904,7 @@
                         <span class="instrument-name">Voz</span>
                     </div>
                     <div class="instrument-content">
-                        <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls class="audio-player"></audio>
+                        <audio id="vocal" src="/separados/mdx_extra_q/@(folder)/vocals.wav" controls class="audio-player"></audio>
                         <div class="slider-container">
                             <div class="slider-label">
                                 <span>Volume</span>
@@ -923,7 +923,7 @@
                         <span class="instrument-name">Bateria</span>
                     </div>
                     <div class="instrument-content">
-                        <audio id="bateria" src="/separados/mdx_extra_q/@folder/drums.wav" controls class="audio-player"></audio>
+                        <audio id="bateria" src="/separados/mdx_extra_q/@(folder)/vocals.wav" controls class="audio-player"></audio>
                         <div class="slider-container">
                             <div class="slider-label">
                                 <span>Volume</span>
@@ -942,7 +942,7 @@
                         <span class="instrument-name">Baixo</span>
                     </div>
                     <div class="instrument-content">
-                        <audio id="baixo" src="/separados/mdx_extra_q/@folder/bass.wav" controls class="audio-player"></audio>
+                        <audio id="baixo" src="/separados/mdx_extra_q/@(folder)/vocals.wav" controls class="audio-player"></audio>
                         <div class="slider-container">
                             <div class="slider-label">
                                 <span>Volume</span>
@@ -961,7 +961,7 @@
                         <span class="instrument-name">Outros</span>
                     </div>
                     <div class="instrument-content">
-                        <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls class="audio-player"></audio>
+                        <audio id="outros" src="/separados/mdx_extra_q/@(folder)/vocals.wav" controls class="audio-player"></audio>
                         <div class="slider-container">
                             <div class="slider-label">
                                 <span>Volume</span>
@@ -1091,9 +1091,19 @@
             document.getElementById("tempoExecucao").textContent += " (finalizado)";
         }
 
-        document.getElementById("formUpload").addEventListener("submit", function (e) {
+                document.getElementById("formUpload").addEventListener("submit", function (e) {
             e.preventDefault();
+
             const formData = new FormData(this);
+
+            const destino = prompt("Informe o nome da pasta onde deseja salvar os arquivos separados:");
+            if (!destino) {
+                alert("Operação cancelada. Nenhuma pasta informada.");
+                return;
+            }
+
+            formData.append("destino", destino);
+
             iniciarCronometro();
             mostrarOverlay();
 
@@ -1101,19 +1111,30 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.text())
-            .then(data => {
-                pararCronometro();
-                ocultarOverlay();
-                alert(data);
-                location.reload();
-            })
+            .then(response => response.json())
+                    .then(data => {
+            pararCronometro();
+            ocultarOverlay();
+
+            if (data.success) {
+                const nomeSubpasta = data.nomeArquivo;
+
+                // Redireciona com parâmetro para carregar os players corretamente
+                const finalFolder = `${destino}/${nomeSubpasta}`;
+                window.location.href = `/?folder=${encodeURIComponent(finalFolder)}`;
+            } else {
+                alert("Erro ao converter o arquivo.");
+            }
+        })
+
+
             .catch(error => {
                 pararCronometro();
                 ocultarOverlay();
                 alert("Erro: " + error);
             });
         });
+
 
         function updatePlaybackSpeed(percent) {
             const rate = percent / 100;
