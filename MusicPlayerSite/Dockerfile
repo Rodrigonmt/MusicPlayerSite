@@ -29,7 +29,8 @@ RUN apt-get update && apt-get install -y \
 COPY MusicPlayerSite/requirements.txt /app/requirements.txt
 
 RUN pip install --upgrade pip && \
-    pip install -r /app/requirements.txt
+    pip install --break-system-packages -r /app/requirements.txt
+
 
 WORKDIR /app
 COPY --from=build /app/out .
