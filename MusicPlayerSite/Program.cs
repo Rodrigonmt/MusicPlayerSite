@@ -13,6 +13,6 @@ app.Run();
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30); // ou o necessário
-    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(300); // ou o necessário
+    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(500);
 });

@@ -52,68 +52,60 @@ namespace MusicPlayerSite.Controllers
                 var outputPath = Path.Combine(_env.WebRootPath, "separados");
                 Directory.CreateDirectory(outputPath);
 
-                System.Console.WriteLine($"Comando: demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"");
-                System.Console.WriteLine($"Arquivo existe? {System.IO.File.Exists(filePath)}");
-
-
-
-                var psi = new ProcessStartInfo
+                // 👇 Executa o Demucs em segundo plano
+                _ = Task.Run(() =>
                 {
-                    FileName = "python3",
-                    Arguments = "-m demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
+                    System.Console.WriteLine($"Comando: demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"");
+                    System.Console.WriteLine($"Arquivo existe? {System.IO.File.Exists(filePath)}");
 
-                };
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "python3",
+                        Arguments = $"-m demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
 
+                    using var process = new Process { StartInfo = psi };
 
-                psi.Environment["PATH"] += @";C:\ffmpeg\bin";
+                    process.OutputDataReceived += (s, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                            System.Console.WriteLine("OUT: " + e.Data);
+                    };
 
-                psi.RedirectStandardOutput = true;
-                psi.RedirectStandardError = true;
+                    process.ErrorDataReceived += (s, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                            System.Console.WriteLine("ERR: " + e.Data);
+                    };
 
-                using var process = new Process();
-                process.StartInfo = psi;
+                    process.Start();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
 
-                process.OutputDataReceived += (s, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        System.Console.WriteLine("OUT: " + e.Data);
-                };
+                    process.WaitForExit();
 
-                process.ErrorDataReceived += (s, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        System.Console.WriteLine("ERR: " + e.Data);
-                };
+                    if (process.ExitCode != 0)
+                    {
+                        System.Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Demucs executado com sucesso!");
+                    }
+                });
 
-                process.Start();
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                await process.WaitForExitAsync();
-
-                if (process.ExitCode != 0)
-                {
-                    System.Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
-                }
-                else
-                {
-                    System.Console.WriteLine("Demucs executado com sucesso!");
-                }
-
-
-                // 👇 Salva nome da pasta gerada para a View usar
                 TempData["FolderName"] = fileNameWithoutExt;
 
-
+                return Content("Arquivo enviado com sucesso. A separação dos instrumentos está em andamento.");
             }
 
-            return Content("Conversão concluída com sucesso!");
+            return BadRequest("Arquivo inválido");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> UploadSeparatedWavs([FromForm] List<IFormFile> files, [FromForm] string folderName)
