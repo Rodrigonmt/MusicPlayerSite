@@ -36,8 +36,9 @@ RUN apt-get update && apt-get install -y \
 # Instala o runtime do .NET 8
 RUN wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh && \
     chmod +x dotnet-install.sh && \
-    ./dotnet-install.sh --version 8.0.0 --runtime aspnet --install-dir /usr/share/dotnet && \
+    ./dotnet-install.sh --version 8.0.0 --runtime aspnetcore --install-dir /usr/share/dotnet && \
     ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
 
 ENV DOTNET_ROOT=/usr/share/dotnet
 
