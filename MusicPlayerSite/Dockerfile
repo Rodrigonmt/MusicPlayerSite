@@ -1,22 +1,21 @@
-﻿# Etapa de build
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+﻿# Etapa 1 - build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia o csproj e restaura dependências
+# Copia tudo e restaura dependências
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copia todo o projeto e compila
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-# Etapa de runtime
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+# Etapa 2 - runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Porta padrão para ASP.NET Core
-EXPOSE 80
+# Define porta (Render usa variável PORT)
+ENV ASPNETCORE_URLS=http://+:$PORT
+EXPOSE 10000
 
-# Executa o projeto
-ENTRYPOINT ["dotnet", "MusicPlayerSite"]
+ENTRYPOINT ["dotnet", "MusicPlayerSite.dll"]
