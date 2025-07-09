@@ -18,15 +18,371 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 1rem;
             color: #334155;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Animation - Music Evolution */
+        .music-evolution-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .era-section {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            animation: eraTransition 20s infinite;
+        }
+
+            .era-section:nth-child(1) {
+                animation-delay: 0s;
+            }
+
+            .era-section:nth-child(2) {
+                animation-delay: 4s;
+            }
+
+            .era-section:nth-child(3) {
+                animation-delay: 8s;
+            }
+
+            .era-section:nth-child(4) {
+                animation-delay: 12s;
+            }
+
+            .era-section:nth-child(5) {
+                animation-delay: 16s;
+            }
+
+        @@keyframes eraTransition {
+            0%, 20%
+
+        {
+            opacity: 1;
+        }
+
+        25%, 100% {
+            opacity: 0;
+        }
+
+        }
+
+        /* 1950s - Jazz/Blues Era */
+        .era-1950s {
+            background: radial-gradient(circle at 30% 70%, rgba(139, 69, 19, 0.3) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255, 215, 0, 0.2) 0%, transparent 50%), linear-gradient(45deg, #2c1810 0%, #1a1a2e 100%);
+        }
+
+            .era-1950s::before {
+                content: "🎷 🎺 🎹 ♪ ♫ 🎵";
+                position: absolute;
+                top: 20%;
+                left: 10%;
+                font-size: 2rem;
+                animation: float 6s ease-in-out infinite;
+                color: rgba(255, 215, 0, 0.6);
+            }
+
+            .era-1950s::after {
+                content: "Jazz & Blues Era • 1950s";
+                position: absolute;
+                bottom: 20%;
+                right: 10%;
+                font-size: 1.2rem;
+                color: rgba(255, 215, 0, 0.8);
+                font-weight: bold;
+            }
+
+        /* 1970s - Rock Era */
+        .era-1970s {
+            background: radial-gradient(circle at 20% 80%, rgba(255, 0, 0, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 165, 0, 0.2) 0%, transparent 50%), linear-gradient(135deg, #4a0e4e 0%, #2c1810 100%);
+        }
+
+            .era-1970s::before {
+                content: "🎸 🥁 🎤 ⚡ 🔥 🤘";
+                position: absolute;
+                top: 30%;
+                right: 15%;
+                font-size: 2rem;
+                animation: rock 4s ease-in-out infinite;
+                color: rgba(255, 69, 0, 0.7);
+            }
+
+            .era-1970s::after {
+                content: "Rock & Roll Era • 1970s";
+                position: absolute;
+                bottom: 30%;
+                left: 10%;
+                font-size: 1.2rem;
+                color: rgba(255, 69, 0, 0.8);
+                font-weight: bold;
+            }
+
+        /* 1980s - Synth Era */
+        .era-1980s {
+            background: radial-gradient(circle at 50% 50%, rgba(255, 0, 255, 0.3) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.2) 0%, transparent 50%), linear-gradient(45deg, #1a0033 0%, #330066 100%);
+        }
+
+            .era-1980s::before {
+                content: "🎹 🎛️ 💿 ✨ 🌟 💫";
+                position: absolute;
+                top: 25%;
+                left: 20%;
+                font-size: 2rem;
+                animation: synth 5s ease-in-out infinite;
+                color: rgba(255, 0, 255, 0.7);
+            }
+
+            .era-1980s::after {
+                content: "Synth & New Wave • 1980s";
+                position: absolute;
+                bottom: 25%;
+                right: 15%;
+                font-size: 1.2rem;
+                color: rgba(0, 255, 255, 0.8);
+                font-weight: bold;
+            }
+
+        /* 2000s - Digital Era */
+        .era-2000s {
+            background: radial-gradient(circle at 70% 30%, rgba(0, 255, 0, 0.3) 0%, transparent 50%), radial-gradient(circle at 30% 70%, rgba(0, 191, 255, 0.2) 0%, transparent 50%), linear-gradient(135deg, #001122 0%, #003366 100%);
+        }
+
+            .era-2000s::before {
+                content: "💻 🎧 📱 🔊 🎵 💽";
+                position: absolute;
+                top: 35%;
+                right: 20%;
+                font-size: 2rem;
+                animation: digital 3s ease-in-out infinite;
+                color: rgba(0, 255, 127, 0.7);
+            }
+
+            .era-2000s::after {
+                content: "Digital Revolution • 2000s";
+                position: absolute;
+                bottom: 35%;
+                left: 15%;
+                font-size: 1.2rem;
+                color: rgba(0, 191, 255, 0.8);
+                font-weight: bold;
+            }
+
+        /* 2020s - Streaming Era */
+        .era-2020s {
+            background: radial-gradient(circle at 40% 60%, rgba(138, 43, 226, 0.3) 0%, transparent 50%), radial-gradient(circle at 60% 40%, rgba(255, 20, 147, 0.2) 0%, transparent 50%), linear-gradient(45deg, #0f0f23 0%, #2d1b69 100%);
+        }
+
+            .era-2020s::before {
+                content: "🎵 📲 🌐 🎤 🎧 ⚡";
+                position: absolute;
+                top: 40%;
+                left: 25%;
+                font-size: 2rem;
+                animation: streaming 4s ease-in-out infinite;
+                color: rgba(255, 20, 147, 0.7);
+            }
+
+            .era-2020s::after {
+                content: "Streaming & AI Era • 2020s";
+                position: absolute;
+                bottom: 40%;
+                right: 20%;
+                font-size: 1.2rem;
+                color: rgba(138, 43, 226, 0.8);
+                font-weight: bold;
+            }
+
+        /* Floating musical notes */
+        .floating-notes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .note {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: floatUp 8s linear infinite;
+        }
+
+            .note:nth-child(1) {
+                left: 10%;
+                animation-delay: 0s;
+            }
+
+            .note:nth-child(2) {
+                left: 20%;
+                animation-delay: 1s;
+            }
+
+            .note:nth-child(3) {
+                left: 30%;
+                animation-delay: 2s;
+            }
+
+            .note:nth-child(4) {
+                left: 40%;
+                animation-delay: 3s;
+            }
+
+            .note:nth-child(5) {
+                left: 50%;
+                animation-delay: 4s;
+            }
+
+            .note:nth-child(6) {
+                left: 60%;
+                animation-delay: 5s;
+            }
+
+            .note:nth-child(7) {
+                left: 70%;
+                animation-delay: 6s;
+            }
+
+            .note:nth-child(8) {
+                left: 80%;
+                animation-delay: 7s;
+            }
+
+            .note:nth-child(9) {
+                left: 90%;
+                animation-delay: 0.5s;
+            }
+
+        @@keyframes floatUp {
+            0%
+
+        {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 0.3;
+        }
+
+        90% {
+            opacity: 0.3;
+        }
+
+        100% {
+            transform: translateY(-100px) rotate(360deg);
+            opacity: 0;
+        }
+
+        }
+
+        @@keyframes float {
+            0%, 100%
+
+        {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(5deg);
+        }
+
+        }
+
+        @@keyframes rock {
+            0%, 100%
+
+        {
+            transform: scale(1) rotate(0deg);
+        }
+
+        25% {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        75% {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        }
+
+        @@keyframes synth {
+            0%, 100%
+
+        {
+            transform: translateX(0px) scale(1);
+        }
+
+        33% {
+            transform: translateX(10px) scale(1.05);
+        }
+
+        66% {
+            transform: translateX(-10px) scale(0.95);
+        }
+
+        }
+
+        @@keyframes digital {
+            0%, 100%
+
+        {
+            transform: translateY(0px) scale(1);
+            opacity: 0.7;
+        }
+
+        50% {
+            transform: translateY(-10px) scale(1.1);
+            opacity: 1;
+        }
+
+        }
+
+        @@keyframes streaming {
+            0%, 100%
+
+        {
+            transform: rotate(0deg) scale(1);
+        }
+
+        25% {
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        50% {
+            transform: rotate(180deg) scale(1);
+        }
+
+        75% {
+            transform: rotate(270deg) scale(1.1);
+        }
+
+        }
+
+        /* Main content overlay */
+        .content-overlay {
+            position: relative;
+            z-index: 1;
+            background: rgba(248, 250, 252, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
@@ -345,11 +701,37 @@
             color: #1e293b;
         }
 
+        /* Color variations for instruments */
+        .vocal-accent {
+            border-top: 4px solid #3b82f6;
+        }
+
+        .bateria-accent {
+            border-top: 4px solid #ef4444;
+        }
+
+        .baixo-accent {
+            border-top: 4px solid #10b981;
+        }
+
+        .outros-accent {
+            border-top: 4px solid #8b5cf6;
+        }
+
         /* Responsive Design */
         @@media (max-width: 768px) {
-            .header h1
+            .content-overlay
 
         {
+            margin: 1rem;
+            border-radius: 1rem;
+        }
+
+        .container {
+            padding: 1rem;
+        }
+
+        .header h1 {
             font-size: 2rem;
         }
 
@@ -370,234 +752,250 @@
             grid-template-columns: 1fr;
         }
 
+        .era-section::before {
+            font-size: 1.5rem;
         }
 
-        /* Color variations for instruments */
-        .vocal-accent {
-            border-top: 4px solid #3b82f6;
+        .era-section::after {
+            font-size: 1rem;
         }
 
-        .bateria-accent {
-            border-top: 4px solid #ef4444;
-        }
-
-        .baixo-accent {
-            border-top: 4px solid #10b981;
-        }
-
-        .outros-accent {
-            border-top: 4px solid #8b5cf6;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Player Multi-Instrumentos</h1>
-            <p>Separação e reprodução de componentes de áudio</p>
+    <!-- Music Evolution Background -->
+    <div class="music-evolution-bg">
+        <div class="era-section era-1950s"></div>
+        <div class="era-section era-1970s"></div>
+        <div class="era-section era-1980s"></div>
+        <div class="era-section era-2000s"></div>
+        <div class="era-section era-2020s"></div>
+
+        <!-- Floating musical notes -->
+        <div class="floating-notes">
+            <div class="note">♪</div>
+            <div class="note">♫</div>
+            <div class="note">♪</div>
+            <div class="note">♬</div>
+            <div class="note">♫</div>
+            <div class="note">♪</div>
+            <div class="note">♬</div>
+            <div class="note">♫</div>
+            <div class="note">♪</div>
         </div>
+    </div>
 
-        <!-- Execution Time Alert -->
-        @if (ViewBag.TempoExecucao != null)
-        {
-            <div class="alert">
-                <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12,6 12,12 16,14" />
-                </svg>
-                Tempo de conversão: @ViewBag.TempoExecucao
+    <!-- Main Content -->
+    <div class="content-overlay">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1>Player Multi-Instrumentos</h1>
+                <p>Separação e reprodução de componentes de áudio</p>
             </div>
-        }
 
-        <!-- Upload Section -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
+            <!-- Execution Time Alert -->
+            @if (ViewBag.TempoExecucao != null)
+            {
+                <div class="alert">
                     <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7,10 12,15 17,10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12,6 12,12 16,14" />
                     </svg>
-                    Separação de Componentes de Áudio
-                </h2>
-            </div>
-            <form id="formUpload" enctype="multipart/form-data">
-                <div class="form-group">
-                    <input type="file" name="file" accept=".mp3" />
-                    <button type="submit" class="btn btn-primary">Iniciar</button>
+                    Tempo de conversão: @ViewBag.TempoExecucao
                 </div>
-                <div id="tempoExecucao" class="time-display">Tempo: 0s</div>
-            </form>
-        </div>
+            }
 
-        <!-- Global Controls -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Controles Globais</h2>
-            </div>
-            <div class="global-controls">
-                <button onclick="playAll()" class="btn btn-outline">
-                    ▶️ Play
-                </button>
-                <button onclick="pauseAll()" class="btn btn-outline">
-                    ⏸️ Pause
-                </button>
-                <button onclick="stopAll()" class="btn btn-outline">
-                    ⏹️ Parar
-                </button>
-            </div>
-        </div>
-
-        <!-- Playback Controls -->
-        <div class="controls-grid">
-            <!-- Speed Control -->
+            <!-- Upload Section -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">
-                        Velocidade de Reprodução
-                        <span id="speedLabel" style="font-family: monospace;">100%</span>
-                    </h3>
+                    <h2 class="card-title">
+                        <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7,10 12,15 17,10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Separação de Componentes de Áudio
+                    </h2>
                 </div>
-                <div class="slider-container">
-                    <input id="speedControl" type="range" min="10" max="200" value="100" step="1"
-                           class="slider" onchange="updatePlaybackSpeed(this.value)" />
-                </div>
-                <button onclick="document.getElementById('speedControl').value = 100; updatePlaybackSpeed(100)"
-                        class="btn btn-outline">
-                    🔄 Resetar Velocidade
-                </button>
+                <form id="formUpload" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" name="file" accept=".mp3" />
+                        <button type="submit" class="btn btn-primary">Iniciar</button>
+                    </div>
+                    <div id="tempoExecucao" class="time-display">Tempo: 0s</div>
+                </form>
             </div>
 
-            <!-- Loop Control -->
+            <!-- Global Controls -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">
-                        🔁 Loop Personalizado
-                    </h3>
+                    <h2 class="card-title">Controles Globais</h2>
                 </div>
-                <div class="loop-controls">
-                    <div class="input-group">
-                        <label for="loopStart">Início (s)</label>
-                        <input id="loopStart" type="number" min="0" value="0" />
-                    </div>
-                    <div class="input-group">
-                        <label for="loopEnd">Fim (s)</label>
-                        <input id="loopEnd" type="number" min="1" value="10" />
-                    </div>
-                </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button onclick="ativarLoop()" class="btn btn-primary" style="flex: 1;">
-                        Ativar Loop
+                <div class="global-controls">
+                    <button onclick="playAll()" class="btn btn-outline">
+                        ▶️ Play
                     </button>
-                    <button onclick="desativarLoop()" class="btn btn-outline" style="flex: 1;">
-                        Desativar Loop
+                    <button onclick="pauseAll()" class="btn btn-outline">
+                        ⏸️ Pause
+                    </button>
+                    <button onclick="stopAll()" class="btn btn-outline">
+                        ⏹️ Parar
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Instruments Section -->
-        <h2 class="section-title">Instrumentos Separados</h2>
-        <div class="instruments-grid">
-            <!-- Vocal -->
-            <div class="instrument-card vocal-accent">
-                <div class="instrument-header">
-                    <span class="instrument-icon">🎤</span>
-                    <span class="instrument-name">Voz</span>
-                </div>
-                <div class="instrument-content">
-                    <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls class="audio-player"></audio>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Volume</span>
-                            <span id="vocal-volume">100%</span>
-                        </div>
-                        <input type="range" min="0" max="1" step="0.01" value="1"
-                               class="slider" onchange="setVolume('vocal', this.value)" />
+            <!-- Playback Controls -->
+            <div class="controls-grid">
+                <!-- Speed Control -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Velocidade de Reprodução
+                            <span id="speedLabel" style="font-family: monospace;">100%</span>
+                        </h3>
                     </div>
-                </div>
-            </div>
-
-            <!-- Bateria -->
-            <div class="instrument-card bateria-accent">
-                <div class="instrument-header">
-                    <span class="instrument-icon">🥁</span>
-                    <span class="instrument-name">Bateria</span>
-                </div>
-                <div class="instrument-content">
-                    <audio id="bateria" src="/separados/mdx_extra_q/@folder/drums.wav" controls class="audio-player"></audio>
                     <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Volume</span>
-                            <span id="bateria-volume">100%</span>
-                        </div>
-                        <input type="range" min="0" max="1" step="0.01" value="1"
-                               class="slider" onchange="setVolume('bateria', this.value)" />
+                        <input id="speedControl" type="range" min="10" max="200" value="100" step="1"
+                               class="slider" onchange="updatePlaybackSpeed(this.value)" />
                     </div>
-                </div>
-            </div>
-
-            <!-- Baixo -->
-            <div class="instrument-card baixo-accent">
-                <div class="instrument-header">
-                    <span class="instrument-icon">🎸</span>
-                    <span class="instrument-name">Baixo</span>
-                </div>
-                <div class="instrument-content">
-                    <audio id="baixo" src="/separados/mdx_extra_q/@folder/bass.wav" controls class="audio-player"></audio>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Volume</span>
-                            <span id="baixo-volume">100%</span>
-                        </div>
-                        <input type="range" min="0" max="1" step="0.01" value="1"
-                               class="slider" onchange="setVolume('baixo', this.value)" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Outros -->
-            <div class="instrument-card outros-accent">
-                <div class="instrument-header">
-                    <span class="instrument-icon">🎵</span>
-                    <span class="instrument-name">Outros</span>
-                </div>
-                <div class="instrument-content">
-                    <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls class="audio-player"></audio>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Volume</span>
-                            <span id="outros-volume">100%</span>
-                        </div>
-                        <input type="range" min="0" max="1" step="0.01" value="1"
-                               class="slider" onchange="setVolume('outros', this.value)" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- WAV Upload Section -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7,10 12,15 17,10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Carregar Pasta com Arquivos WAV
-                </h2>
-            </div>
-            <form id="wavUploadForm" enctype="multipart/form-data">
-                <div class="form-group">
-                    <input type="file" id="wavFolderInput" name="files" webkitdirectory directory multiple accept=".wav" />
-                    <button type="button" onclick="uploadWavFolder()" class="btn btn-outline">
-                        📁 Enviar
+                    <button onclick="document.getElementById('speedControl').value = 100; updatePlaybackSpeed(100)"
+                            class="btn btn-outline">
+                        🔄 Resetar Velocidade
                     </button>
                 </div>
-            </form>
-            <div id="playersContainer"></div>
+
+                <!-- Loop Control -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            🔁 Loop Personalizado
+                        </h3>
+                    </div>
+                    <div class="loop-controls">
+                        <div class="input-group">
+                            <label for="loopStart">Início (s)</label>
+                            <input id="loopStart" type="number" min="0" value="0" />
+                        </div>
+                        <div class="input-group">
+                            <label for="loopEnd">Fim (s)</label>
+                            <input id="loopEnd" type="number" min="1" value="10" />
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="ativarLoop()" class="btn btn-primary" style="flex: 1;">
+                            Ativar Loop
+                        </button>
+                        <button onclick="desativarLoop()" class="btn btn-outline" style="flex: 1;">
+                            Desativar Loop
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instruments Section -->
+            <h2 class="section-title">Instrumentos Separados</h2>
+            <div class="instruments-grid">
+                <!-- Vocal -->
+                <div class="instrument-card vocal-accent">
+                    <div class="instrument-header">
+                        <span class="instrument-icon">🎤</span>
+                        <span class="instrument-name">Voz</span>
+                    </div>
+                    <div class="instrument-content">
+                        <audio id="vocal" src="/separados/mdx_extra_q/@folder/vocals.wav" controls class="audio-player"></audio>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Volume</span>
+                                <span id="vocal-volume">100%</span>
+                            </div>
+                            <input type="range" min="0" max="1" step="0.01" value="1"
+                                   class="slider" onchange="setVolume('vocal', this.value)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bateria -->
+                <div class="instrument-card bateria-accent">
+                    <div class="instrument-header">
+                        <span class="instrument-icon">🥁</span>
+                        <span class="instrument-name">Bateria</span>
+                    </div>
+                    <div class="instrument-content">
+                        <audio id="bateria" src="/separados/mdx_extra_q/@folder/drums.wav" controls class="audio-player"></audio>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Volume</span>
+                                <span id="bateria-volume">100%</span>
+                            </div>
+                            <input type="range" min="0" max="1" step="0.01" value="1"
+                                   class="slider" onchange="setVolume('bateria', this.value)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Baixo -->
+                <div class="instrument-card baixo-accent">
+                    <div class="instrument-header">
+                        <span class="instrument-icon">🎸</span>
+                        <span class="instrument-name">Baixo</span>
+                    </div>
+                    <div class="instrument-content">
+                        <audio id="baixo" src="/separados/mdx_extra_q/@folder/bass.wav" controls class="audio-player"></audio>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Volume</span>
+                                <span id="baixo-volume">100%</span>
+                            </div>
+                            <input type="range" min="0" max="1" step="0.01" value="1"
+                                   class="slider" onchange="setVolume('baixo', this.value)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outros -->
+                <div class="instrument-card outros-accent">
+                    <div class="instrument-header">
+                        <span class="instrument-icon">🎵</span>
+                        <span class="instrument-name">Outros</span>
+                    </div>
+                    <div class="instrument-content">
+                        <audio id="outros" src="/separados/mdx_extra_q/@folder/other.wav" controls class="audio-player"></audio>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Volume</span>
+                                <span id="outros-volume">100%</span>
+                            </div>
+                            <input type="range" min="0" max="1" step="0.01" value="1"
+                                   class="slider" onchange="setVolume('outros', this.value)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WAV Upload Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7,10 12,15 17,10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Carregar Pasta com Arquivos WAV
+                    </h2>
+                </div>
+                <form id="wavUploadForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" id="wavFolderInput" name="files" webkitdirectory directory multiple accept=".wav" />
+                        <button type="button" onclick="uploadWavFolder()" class="btn btn-outline">
+                            📁 Enviar
+                        </button>
+                    </div>
+                </form>
+                <div id="playersContainer"></div>
+            </div>
         </div>
     </div>
 
