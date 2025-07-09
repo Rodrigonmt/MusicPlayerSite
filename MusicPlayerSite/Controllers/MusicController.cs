@@ -52,28 +52,19 @@ namespace MusicPlayerSite.Controllers
                 var outputPath = Path.Combine(_env.WebRootPath, "separados");
                 Directory.CreateDirectory(outputPath);
 
-                System.Console.WriteLine($"Comando: demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"");
-                System.Console.WriteLine($"Arquivo existe? {System.IO.File.Exists(filePath)}");
-
-
+                Console.WriteLine($"Comando: demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"");
+                Console.WriteLine($"Arquivo existe? {System.IO.File.Exists(filePath)}");
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "demucs",
+                    FileName = "demucs", // ✅ CORRETO para ambiente Linux
                     Arguments = $"-n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = "/app"
+                    WorkingDirectory = "/app" // ✅ importante para Render
                 };
-
-                // Remova a linha psi.Environment["PATH"] += ... (só vale em Windows)
-
-
-
-                psi.RedirectStandardOutput = true;
-                psi.RedirectStandardError = true;
 
                 using var process = new Process();
                 process.StartInfo = psi;
@@ -81,17 +72,16 @@ namespace MusicPlayerSite.Controllers
                 process.OutputDataReceived += (s, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
-                        System.Console.WriteLine("OUT: " + e.Data);
+                        Console.WriteLine("OUT: " + e.Data);
                 };
 
                 process.ErrorDataReceived += (s, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
-                        System.Console.WriteLine("ERR: " + e.Data);
+                        Console.WriteLine("ERR: " + e.Data);
                 };
 
                 process.Start();
-
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
 
@@ -99,22 +89,19 @@ namespace MusicPlayerSite.Controllers
 
                 if (process.ExitCode != 0)
                 {
-                    System.Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
+                    Console.WriteLine("Erro ao executar demucs. Código de saída: " + process.ExitCode);
                 }
                 else
                 {
-                    System.Console.WriteLine("Demucs executado com sucesso!");
+                    Console.WriteLine("Demucs executado com sucesso!");
                 }
 
-
-                // 👇 Salva nome da pasta gerada para a View usar
                 TempData["FolderName"] = fileNameWithoutExt;
-
-
             }
 
             return Content("Conversão concluída com sucesso!");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> UploadSeparatedWavs([FromForm] List<IFormFile> files, [FromForm] string folderName)
