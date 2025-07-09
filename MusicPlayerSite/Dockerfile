@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /app/requirements.txt
+COPY MusicPlayerSite/requirements.txt /app/requirements.txt
 
 RUN pip install --upgrade pip && \
     pip install -r /app/requirements.txt
