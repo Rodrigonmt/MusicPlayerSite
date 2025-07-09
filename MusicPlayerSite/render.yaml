@@ -1,0 +1,6 @@
+﻿services:
+  - type: web
+    name: musicplayersite
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
