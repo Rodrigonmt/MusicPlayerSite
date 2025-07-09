@@ -65,7 +65,7 @@ namespace MusicPlayerSite.Controllers
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = "/app" // importante para ambiente Docker/Render
+                    WorkingDirectory = "/app"
                 };
 
                 // Remova a linha psi.Environment["PATH"] += ... (só vale em Windows)

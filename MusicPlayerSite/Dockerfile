@@ -29,6 +29,12 @@ RUN apt-get update && apt-get install -y \
 # Instala Demucs
 RUN pip3 install --break-system-packages demucs diffq
 
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install demucs diffq
+
+
+
 # Define diretório de trabalho
 WORKDIR /app
 
