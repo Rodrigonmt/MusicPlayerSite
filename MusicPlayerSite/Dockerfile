@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copia apenas o .csproj e requirements.txt
-COPY MusicPlayerSite/MusicPlayerSite.csproj ./MusicPlayerSite/
+COPY . .
 COPY MusicPlayerSite/requirements.txt ./requirements.txt
 
 # Restaura as dependências .NET
