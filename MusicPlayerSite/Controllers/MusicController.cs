@@ -59,7 +59,7 @@ namespace MusicPlayerSite.Controllers
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = @"C:\Users\rodrigor\AppData\Local\Programs\Python\Python313\python.exe", // atualize o caminho
+                    FileName = @"C:\Users\rodrigor\AppData\Local\Programs\Python\Python313\python.exe",
                     Arguments = $"-m demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -67,9 +67,9 @@ namespace MusicPlayerSite.Controllers
                     CreateNoWindow = true
                 };
 
+                var ffmpegPath = Path.Combine(_env.ContentRootPath, "ffmpeg", "bin");
+                psi.Environment["PATH"] += $";{ffmpegPath}";
 
-
-                psi.Environment["PATH"] += @";C:\ffmpeg\bin";
 
                 psi.RedirectStandardOutput = true;
                 psi.RedirectStandardError = true;
