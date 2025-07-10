@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Instala dependências Python
-COPY requirements.txt .
+COPY MusicPlayerSite/requirements.txt .
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
 
@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Instala os pacotes Python de novo no ambiente final
-COPY requirements.txt .
+COPY MusicPlayerSite/requirements.txt .
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
 
