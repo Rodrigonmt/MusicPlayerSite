@@ -100,30 +100,13 @@ namespace MusicPlayerSite.Controllers
 
                 TempData["FolderName"] = fileNameWithoutExt;
 
-                return RedirectToAction("Processando", new { folderName = fileNameWithoutExt });
+                return Content("Arquivo enviado com sucesso. Separação de instrumentos em andamento.");
+
 
             }
 
             return BadRequest("Arquivo inválido");
         }
-
-        public IActionResult Processando(string folderName)
-        {
-            ViewBag.FolderName = folderName;
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult VerificarArquivosSeparados(string folderName)
-        {
-            var outputPath = Path.Combine(_env.WebRootPath, "separados", "mdx_extra_q", folderName);
-            var arquivosEsperados = new[] { "vocals.wav", "drums.wav", "bass.wav", "other.wav" };
-
-            bool completo = arquivosEsperados.All(nome => System.IO.File.Exists(Path.Combine(outputPath, nome)));
-
-            return Json(new { completo });
-        }
-
 
         [HttpPost]
         public async Task<IActionResult> UploadSeparatedWavs([FromForm] List<IFormFile> files, [FromForm] string folderName)
