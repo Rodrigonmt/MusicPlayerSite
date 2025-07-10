@@ -1,17 +1,20 @@
-var builder = WebApplication.CreateBuilder(args);
+ï»¿var builder = WebApplication.CreateBuilder(args);
 
-// ? Aqui você pode registrar serviços
-// builder.Services.AddSingleton<...>();
+// âœ… Registrar serviÃ§os do MVC
+builder.Services.AddControllers();
 
-// ? Configurar Kestrel (se necessário)
+// âœ… Configurar Kestrel (se necessÃ¡rio)
 builder.WebHost.ConfigureKestrel(options =>
 {
-    // configuração de portas, limites de requisição, etc
+    // configuraÃ§Ãµes de servidor
 });
+
+builder.Services.AddControllers(); // âœ… NecessÃ¡rio para MapControllers funcionar
+
 
 var app = builder.Build();
 
-// configurar middlewares e rotas
-app.MapControllers(); // ou MapDefaultControllerRoute()
+// âœ… Mapear rotas de controllers
+app.MapControllers(); // ou .MapDefaultControllerRoute() se tiver views Razor
 
 app.Run();
