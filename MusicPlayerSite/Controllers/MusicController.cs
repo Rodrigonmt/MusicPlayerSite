@@ -59,14 +59,14 @@ namespace MusicPlayerSite.Controllers
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "python3",
-                    Arguments = "-m demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
+                    FileName = @"C:\Users\rodrigor\AppData\Local\Programs\Python\Python313\python.exe", // atualize o caminho
+                    Arguments = $"-m demucs -n mdx_extra_q -o \"{outputPath}\" \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
-
                 };
+
 
 
                 psi.Environment["PATH"] += @";C:\ffmpeg\bin";
