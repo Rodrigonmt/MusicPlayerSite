@@ -1,9 +1,9 @@
 ﻿# ----------------------------
-# Etapa 1: Build com .NET SDK, Python, pip, FFmpeg e dependências Python
+# Etapa 1: Build com SDK .NET, Python, ffmpeg etc
 # ----------------------------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-# Instala Python, pip, ffmpeg, libsndfile (para soundfile) e git
+# Instala dependências
 RUN apt-get update && apt-get install -y \
     python3 python3-pip ffmpeg libsndfile1 git && \
     rm -rf /var/lib/apt/lists/*
@@ -11,15 +11,15 @@ RUN apt-get update && apt-get install -y \
 # Define pasta de trabalho
 WORKDIR /app
 
-# Copia apenas o .csproj e o requirements.txt (para melhor uso de cache)
-COPY MusicPlayerSite/*.csproj ./MusicPlayerSite/
-COPY MusicPlayerSite/requirements.txt ./
+# Copia apenas o .csproj e requirements.txt
+COPY MusicPlayerSite/MusicPlayerSite.csproj ./MusicPlayerSite/
+COPY MusicPlayerSite/requirements.txt ./requirements.txt
 
-# Restaura os pacotes NuGet
+# Restaura as dependências .NET
 WORKDIR /app/MusicPlayerSite
 RUN dotnet restore
 
-# Volta para a raiz e copia o restante do código
+# Copia todo o código após o restore
 WORKDIR /app
 COPY . .
 
@@ -28,17 +28,26 @@ WORKDIR /app/MusicPlayerSite
 RUN dotnet publish -c Release -o /app/out
 
 # ----------------------------
-# Etapa 2: Runtime final
+# Etapa 2: Runtime leve
 # ----------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
-# Instala Python, pip, ffmpeg, libsndfile e git
+# Instala dependências runtime
 RUN apt-get update && apt-get install -y \
     python3 python3-pip ffmpeg libsndfile1 git && \
     rm -rf /var/lib/apt/lists/*
 
-# Copia requirements.txt
-COPY MusicPlayerSite/requirements.txt ./
+# Copia requirements.txt e instala libs Python
+COPY MusicPlayerSite/requirements.txt ./requirements.txt
+RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
+    pip install --no-cache-dir --retries 10 --timeout 100 --break-system-packages -r requirements.txt
 
-# Instala dependências Python no runtime
-RUN python3 -m pip
+# Copia app publicada
+WORKDIR /app
+COPY --from=build /app/out .
+
+# Define porta via Railway
+ENV ASPNETCORE_URLS=http://+:${PORT}
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "MusicPlayerSite.dll"]
