@@ -1,7 +1,7 @@
 ﻿# ----------------------------
 # Etapa 1: Build com .NET SDK, Python, pip, FFmpeg e dependências Python
 # ----------------------------
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 # Instala Python, pip e ffmpeg
 RUN apt-get update && apt-get install -y \
@@ -25,7 +25,7 @@ RUN dotnet publish -c Release -o out
 # ----------------------------
 # Etapa 2: Runtime final (imagem leve)
 # ----------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 # Instala Python + FFmpeg apenas para runtime
 RUN apt-get update && apt-get install -y \
