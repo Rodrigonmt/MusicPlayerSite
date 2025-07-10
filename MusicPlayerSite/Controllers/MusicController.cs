@@ -20,19 +20,24 @@ namespace MusicPlayerSite.Controllers
 
         public IActionResult Index()
         {
-            var separadosPath = Path.Combine(_env.WebRootPath, "separados");
+            var separadosPath = Path.Combine(_env.WebRootPath, "separados", "mdx_extra_q");
+            var arquivosWav = new List<string>();
 
-            var files = Directory.Exists(separadosPath)
-                ? Directory.GetFiles(separadosPath, "*.mp3").Select(f => Path.GetFileName(f)).ToList()
-                : new System.Collections.Generic.List<string>();
+            if (Directory.Exists(separadosPath))
+            {
+                foreach (var pasta in Directory.GetDirectories(separadosPath))
+                {
+                    var arquivos = Directory.GetFiles(pasta, "*.wav");
+                    arquivosWav.AddRange(arquivos.Select(f => Path.GetRelativePath(_env.WebRootPath, f)));
+                }
+            }
 
-            ViewBag.Files = files;
-
-            // 👇 Aqui você pega o nome da pasta gerada (sem extensão)
+            ViewBag.Files = arquivosWav;
             ViewBag.FolderName = TempData["FolderName"]?.ToString();
 
             return View();
         }
+
 
 
         [HttpPost]
@@ -101,6 +106,24 @@ namespace MusicPlayerSite.Controllers
                 TempData["FolderName"] = fileNameWithoutExt;
 
                 return Content("Arquivo enviado com sucesso. Separação de instrumentos em andamento.");
+
+                var generatedFolder = Path.Combine(outputPath, "mdx_extra_q", fileNameWithoutExt);
+                if (Directory.Exists(generatedFolder))
+                {
+                    var wavs = Directory.GetFiles(generatedFolder, "*.wav");
+                    if (wavs.Length == 0)
+                    {
+                        Console.WriteLine("Demucs terminou mas nenhum arquivo WAV foi gerado.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Demucs gerou {wavs.Length} arquivos WAV.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Pasta esperada não encontrada: " + generatedFolder);
+                }
 
 
             }
