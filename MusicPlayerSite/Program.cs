@@ -1,18 +1,17 @@
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllersWithViews();
+
+// ? Aqui você pode registrar serviços
+// builder.Services.AddSingleton<...>();
+
+// ? Configurar Kestrel (se necessário)
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // configuração de portas, limites de requisição, etc
+});
 
 var app = builder.Build();
-app.UseStaticFiles();
-app.UseRouting();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Music}/{action=Index}/{id?}");
+// configurar middlewares e rotas
+app.MapControllers(); // ou MapDefaultControllerRoute()
 
 app.Run();
-
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(300); // ou o necessário
-    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(500);
-});
