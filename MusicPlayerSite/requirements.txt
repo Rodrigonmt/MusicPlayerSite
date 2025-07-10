@@ -1,3 +1,5 @@
 ﻿demucs
 diffq
 soundfile
+torch
+torchaudio

@@ -1,56 +1,47 @@
-﻿# ---------------------------------------------
-# Etapa 1: Imagem de build (compila o app e instala Python + ffmpeg)
-# ---------------------------------------------
+﻿# ----------------------------
+# Etapa 1: Build com .NET SDK, Python, pip, FFmpeg e dependências Python
+# ----------------------------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-# Instala Python, pip, ffmpeg
+# Instala Python, pip, ffmpeg, libsndfile (para soundfile) e git (necessário para alguns pacotes Python)
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    ffmpeg && \
+    python3 python3-pip ffmpeg libsndfile1 git && \
     rm -rf /var/lib/apt/lists/*
 
-# Copia apenas o requirements.txt (para cache de dependências Python)
+# Copia apenas o requirements.txt (para cache eficiente)
 COPY MusicPlayerSite/requirements.txt .
 
-# Atualiza pip e instala dependências Python
-RUN python3 -m pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir --retries 10 --timeout 100 -r requirements.txt
+# Atualiza pip e instala as dependências Python (incluindo demucs, diffq, soundfile)
+RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
+    pip install --no-cache-dir --retries 10 --timeout 100 --break-system-packages -r requirements.txt
 
-# Define a pasta de trabalho para o build do app
+# Define pasta de trabalho e copia o código fonte
 WORKDIR /app
-
-# Copia o restante do código para build
 COPY . .
 
-# Publica o app em modo Release
+# Publica a aplicação .NET
 RUN dotnet publish -c Release -o out
 
-
-# ---------------------------------------------
-# Etapa 2: Imagem final (runtime leve + dependências para execução)
-# ---------------------------------------------
+# ----------------------------
+# Etapa 2: Runtime final (imagem leve)
+# ----------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
-# Instala Python e ffmpeg no ambiente final
+# Instala Python, pip, ffmpeg, libsndfile e git para runtime
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    ffmpeg && \
+    python3 python3-pip ffmpeg libsndfile1 git && \
     rm -rf /var/lib/apt/lists/*
 
-# Copia requirements.txt novamente para reinstalar dependências no runtime
+# Copia requirements.txt
 COPY MusicPlayerSite/requirements.txt .
 
 # Atualiza pip e instala dependências Python no runtime
-RUN python3 -m pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir --retries 10 --timeout 100 -r requirements.txt
+RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
+    pip install --no-cache-dir --retries 10 --timeout 100 --break-system-packages -r requirements.txt
 
-# Define pasta de trabalho para a aplicação publicada
+# Define pasta da aplicação
 WORKDIR /app
-
-# Copia arquivos da build (binários .NET publicados)
 COPY --from=build /app/out .
 
-# Define o comando de entrada (inicia a aplicação ASP.NET)
+# Inicia a aplicação .NET
 ENTRYPOINT ["dotnet", "MusicPlayerSite.dll"]
