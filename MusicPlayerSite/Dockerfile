@@ -1,7 +1,7 @@
 ﻿# ----------------------------
 # Etapa 1: Build com SDK .NET, Python, ffmpeg etc
 # ----------------------------
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
 # Instala dependências
 RUN apt-get update && apt-get install -y \
@@ -30,7 +30,7 @@ RUN dotnet publish -c Release -o /app/out
 # ----------------------------
 # Etapa 2: Runtime leve
 # ----------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 
 # Instala dependências runtime
 RUN apt-get update && apt-get install -y \
