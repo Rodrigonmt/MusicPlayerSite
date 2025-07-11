@@ -1,53 +1,43 @@
-﻿# ----------------------------
-# Etapa 1: Build com SDK .NET, Python, ffmpeg etc
-# ----------------------------
+﻿# Etapa 1: Build com .NET + Python + ffmpeg
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
-# Instala dependências
-RUN apt-get update && apt-get install -y \
-    python3 python3-pip ffmpeg libsndfile1 git && \
-    rm -rf /var/lib/apt/lists/*
-
-# Define pasta de trabalho
 WORKDIR /app
 
-# Copia apenas o .csproj e requirements.txt
-COPY . .
-COPY MusicPlayerSite/requirements.txt ./requirements.txt
+# Copia somente arquivos essenciais para restaurar pacotes primeiro
+COPY MusicPlayerSite/MusicPlayerSite.csproj ./MusicPlayerSite/
+COPY MusicPlayerSite/requirements.txt .
 
-# Restaura as dependências .NET
+# Restaura pacotes .NET
 WORKDIR /app/MusicPlayerSite
 RUN dotnet restore
 
-# Copia todo o código após o restore
+# Copia o restante do código
 WORKDIR /app
 COPY . .
 
-# Publica a aplicação
+# Publica app .NET
 WORKDIR /app/MusicPlayerSite
 RUN dotnet publish -c Release -o /app/out
 
-# ----------------------------
-# Etapa 2: Runtime leve
-# ----------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+# Etapa 2: Runtime enxuto baseado no ASP.NET com Python e ffmpeg
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
-# Instala dependências runtime
+# Instala pacotes necessários no runtime
 RUN apt-get update && apt-get install -y \
     python3 python3-pip ffmpeg libsndfile1 git && \
     rm -rf /var/lib/apt/lists/*
 
-# Copia requirements.txt e instala libs Python
+# Copia requirements.txt e instala dependências Python
 COPY MusicPlayerSite/requirements.txt ./requirements.txt
-RUN python3 -m pip install --upgrade pip setuptools wheel --break-system-packages && \
-    pip install --no-cache-dir --retries 10 --timeout 100 --break-system-packages -r requirements.txt
+RUN python3 -m pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copia app publicada
+# Define pasta de execução do app
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Define porta via Railway
-ENV ASPNETCORE_URLS=http://+:${PORT}
-EXPOSE 8080
+# Define porta padrão para Railway
+ENV ASPNETCORE_URLS=http://+:3000
+EXPOSE 3000
 
 ENTRYPOINT ["dotnet", "MusicPlayerSite.dll"]
