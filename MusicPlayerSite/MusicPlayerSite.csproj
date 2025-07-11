@@ -14,16 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="railway.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="wwwroot\separados\htdemucs\" />
     <Folder Include="wwwroot\uploads\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="railway.json" />
   </ItemGroup>
 
 </Project>
