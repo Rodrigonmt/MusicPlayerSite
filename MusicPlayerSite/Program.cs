@@ -1,24 +1,30 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
-// Configura tempo limite do Kestrel ANTES de builder.Build()
+// 🔧 Define a porta vinda do Railway (ou usa 3000 localmente)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "3000";
+builder.WebHost.UseUrls($"http://*:{port}");
+
+// ⏱️ Configura limites do Kestrel
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30);
     serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
 });
 
-// Registra servi�os MVC
+// ➕ Registra serviços MVC
 builder.Services.AddControllersWithViews();
 
-// Constr�i o app
+// 🛠️ Constrói o app
 var app = builder.Build();
 
-// Configura pipeline HTTP
+// 🌐 Middleware
 app.UseStaticFiles();
 app.UseRouting();
 
+// 📍 Rota padrão
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Music}/{action=Index}/{id?}");
 
+// 🚀 Inicia o app
 app.Run();
